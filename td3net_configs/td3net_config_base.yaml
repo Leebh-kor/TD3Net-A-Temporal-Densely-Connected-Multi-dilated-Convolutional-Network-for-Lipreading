@@ -1,0 +1,11 @@
+# base
+growth_rate: [36, 36, 36, 36]
+num_layers: [5, 5, 5, 5]
+num_td2_blocks: [10, 10, 10, 10]
+out_block: [5, 5, 5, 5]
+block_comp: [0.5, 0.5, 0.5, 0.5]
+trans_comp_factor: [2, 2, 2, 1]
+kernel_size: 3
+is_cbr: True
+dropout_p : 0.2
+

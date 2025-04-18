@@ -1,0 +1,13 @@
+# TD2 block 개수 실험
+# 28.65M
+growth_rate: [64, 64, 64, 64]
+num_layers: [6, 14, 28, 16]
+num_td2_blocks: [1, 1, 1, 1]
+out_block: [6, 14, 28, 16]
+block_comp: [0.5, 0.5, 0.5, 1]
+trans_comp_factor: [2, 2, 2, 1] # Not used
+kernel_size: 3
+is_cbr: True
+dropout_p: 0.2
+
+
