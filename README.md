@@ -13,9 +13,9 @@ The standard word-level lipreading approach is based on a framework comprising f
 
 | Method | # Params (M) | Inference time (s) | Accuracy (%) |
 |--------|-------------|-------------------|--------------|
-| TD3Net-Base | 30.75 | 45 | [89.36±0.09](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_base/ckpt.best.pth.tar) |
-| TD3Net-Best | 44.23 | 49 | [89.54±0.08](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_best/ckpt.best.pth.tar) |
-| TD3Net-Best (w word boundary) | 44.23 | 49 | [91.41±0.10](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/wb_td3net_best/ckpt.best.pth.tar) |
+| TD3Net-Base | 30.75 | 45 | [89.36](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_base/ckpt.best.pth.tar) |
+| TD3Net-Best | 44.23 | 49 | [89.54](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_best/ckpt.best.pth.tar) |
+| TD3Net-Best (w word boundary) | 44.23 | 49 | [91.41](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/wb_td3net_best/ckpt.best.pth.tar) |
 
 > Click on the accuracy values to download the corresponding model weights.
 
