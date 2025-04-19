@@ -20,6 +20,7 @@ The standard word-level lipreading approach is based on a framework comprising f
 > Click on the accuracy values to download the corresponding model weights.
 
 ## Requirements
+- Windows or Linux OS
 - Python 3.8
 - UV package manager
 - CUDA 11.1 (for PyTorch GPU version)
@@ -50,10 +51,10 @@ source .venv/bin/activate
 Install all packages specified in requirements.txt:
 ```bash
 # Using pip
-pip install -e .
+pip install -r requirements.txt
 
 # Or using uv (recommended)
-uv pip install -e .
+uv pip install -r requirements.txt
 ```
 
 ## Training and Experimentation
@@ -79,6 +80,14 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
     --ex-name td3net_base \
     --model-path ./train_logs/tmp/ckpt.pth.tar
 ```
+
+### Multiple Experiments and Model Testing
+
+#### Running Multiple Experiments
+For running multiple experiments using different GPUs, refer to `multiple_run.sh`. This script helps you manage multiple training runs in parallel (Note: This is not about distributed training).
+
+#### Model Architecture Testing
+To test different model configurations and architectures, use `test_model.sh`. This script provides a convenient way to verify model structure, parameter counts, and memory usage before actual training.
 
 ## Notes
 - This project uses PyTorch 1.8.0 with CUDA 11.1
