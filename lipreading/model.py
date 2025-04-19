@@ -1,4 +1,5 @@
 import math
+import warnings
 
 import numpy as np
 import timm
@@ -22,34 +23,30 @@ class FrameEmbedding(nn.Module):
         self, 
         in_channels = 1, 
         emb_size = 512, 
-        backbone_type = 'efficientnet_v2_t_inc_24', 
+        backbone_type = 'efficientnetv2_s', 
         relu_type = 'prelu',
+        use_pretrained = False,
     ):
         super().__init__()
         self.in_channels = in_channels
         
-        # Common frontend for both ResNet and EfficientNet
-        frontend_nout = 64
-        frontend_relu = nn.PReLU(num_parameters=frontend_nout) if relu_type == 'prelu' else nn.SiLU()
-        self.frontend = nn.Sequential(
-            nn.Conv3d(in_channels, frontend_nout, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3), bias=False),
-            nn.BatchNorm3d(frontend_nout),
-            frontend_relu,
-            nn.MaxPool3d(kernel_size=(1, 3, 3), stride=(1, 2, 2), padding=(0, 1, 1))
-        )
-        
+        # Create backbone first to determine frontend output channels
         if 'resnet' in backbone_type:
+            if use_pretrained:
+                warnings.warn("Pretrained weights are only supported for EfficientNet models. Ignoring use_pretrained=True for ResNet.")
             self.trunk = ResNet(BasicBlock, [2, 2, 2, 2], relu_type=relu_type)
             self.emb_dim = emb_size
+            frontend_nout = 64  # ResNet expects 64 channels
             
         elif 'efficientnet' in backbone_type:
             # Create EfficientNet backbone
-            backbone = timm.create_model(backbone_type, pretrained=True, in_chans=frontend_nout)
-            # Remove the first conv+bn+act and stem blocks since we have our own frontend
+            backbone = timm.create_model(backbone_type, pretrained=use_pretrained)
             if hasattr(backbone, 'conv_stem'):
+                frontend_nout = backbone.conv_stem.out_channels  # Get first layer's output channels
                 backbone.conv_stem = nn.Identity()
                 backbone.bn1 = nn.Identity()
             elif hasattr(backbone, 'conv1'):
+                frontend_nout = backbone.conv1.out_channels  # Get first layer's output channels
                 backbone.conv1 = nn.Identity()
                 backbone.bn1 = nn.Identity()
             
@@ -58,7 +55,17 @@ class FrameEmbedding(nn.Module):
             self.trunk = backbone
             self.emb_dim = backbone.num_features
         
-        # print(f"Using backbone: {backbone_type}, Output dimension: {self.emb_dim}")
+        # Common frontend with matched output channels
+        frontend_relu = nn.PReLU(num_parameters=frontend_nout) if relu_type == 'prelu' else nn.SiLU()
+        self.frontend = nn.Sequential(
+            nn.Conv3d(in_channels, frontend_nout, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3), bias=False),
+            nn.BatchNorm3d(frontend_nout),
+            frontend_relu,
+            nn.MaxPool3d(kernel_size=(1, 3, 3), stride=(1, 2, 2), padding=(0, 1, 1))
+        )
+        
+        pretrained_status = "with pretrained weights" if use_pretrained and 'efficientnet' in backbone_type else "without pretrained weights"
+        print(f"Using backbone: {backbone_type} ({pretrained_status}), Frontend channels: {frontend_nout}, Output dimension: {self.emb_dim}")
 
     def forward(self, x):
         B, _, T, H, W = x.size()
@@ -95,12 +102,14 @@ class TD3Net_Lipreading(nn.Module):
         use_td3_block=True,
         use_multi_dilation=True,
         use_bottle_layer=True,
+        use_pretrained=False,
     ):
         super().__init__()
         self.emd_network = FrameEmbedding(
                                 emb_size=emb_size,
                                 backbone_type=backbone_type,
                                 relu_type=relu_type,
+                                use_pretrained=use_pretrained,
                                 )
         emb_dim = self.emd_network.emb_dim
         
@@ -166,7 +175,7 @@ if __name__ == '__main__':
     # Model variants to test
     model_configs = [
         # TD3Net variants
-        {'name': 'TD3Net (default)', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': False},
+        {'name': 'TD3Net (default)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
         # {'name': 'TD3Net (no bottleneck)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
         # TD2Net variants
         # {'name': 'TD2Net', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': True},
@@ -179,21 +188,21 @@ if __name__ == '__main__':
     # Default input size
     input_size = (2, 1, 29, 88, 88)  # batch_size, channels, frames, height, width
     
-    # Backbone types
-    # backbone_types = ['resnet', 'efficientnet_v2_t_inc_24', 'efficientnet_v2_t_inc_32', 'efficientnet_v2_t_inc_64']
-    backbone_types = ['resnet']
-    
+    # Backbone types - use tf_efficientnetv2_s instead of efficientnetv2_s
+    backbone_types = ['resnet', 'tf_efficientnetv2_s', 'tf_efficientnetv2_m', 'tf_efficientnetv2_l']  # This is the correct model name in timm
+    # backbone_types = ['tf_efficientnetv2_s']
     # Configuration from td3net_config_base.yaml
     config = {
         'growth_rate': [52, 52, 52, 52],
-        'num_layers': [12, 20, 24, 18],
+        'num_layers': [16, 20, 24, 18],
         'num_td2_blocks': [1, 1, 1, 1],
-        'out_block': [12, 20, 24, 18],
+        'out_block': [16, 20, 24, 18],
         'block_comp': [0.5, 0.5, 0.5, 1],
         'trans_comp_factor': [2, 2, 2, 1],
         'kernel_size': 3,
         'is_cbr': True,
-        'dropout_p': 0.2
+        'dropout_p': 0.2,
+        'use_pretrained': False  # Default value from config.py
     }
     
     print("\n=== Model Testing Started ===\n")
@@ -224,31 +233,33 @@ if __name__ == '__main__':
                 use_td3_block=model_config['use_td3_block'],
                 use_multi_dilation=model_config['use_multi_dilation'],
                 use_bottle_layer=model_config['use_bottle_layer'],
+                use_pretrained=True,
             )
             
-            # Set model to evaluation mode
-            # model.eval()
-            
-            # Create dummy input
-            # dummy_input = torch.randn(input_size)
-            
             try:
-                # Forward pass
-                # with torch.no_grad():
-                    # output = model(dummy_input)
-                
                 # Print results
-                # print(f"Output shape: {output.shape}")
                 print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M")
                 
-                # Check memory usage
-                if torch.cuda.is_available():
-                    print(f"GPU memory usage: {torch.cuda.memory_allocated() / 1024**2:.2f}MB")
+                # Create dummy input
+                dummy_input = torch.randn(input_size)
                 
-                # Print model summary using torchinfo
-                from torchinfo import summary
-                print("\nModel Summary:")
-                summary(model, input_size=input_size, device='cuda' if torch.cuda.is_available() else 'cpu')
+                # Forward pass test
+                model.eval()  # Set model to evaluation mode
+                with torch.no_grad():
+                    try:
+                        output = model(dummy_input)
+                        print(f"Forward pass successful. Output shape: {output.shape}")
+                    except Exception as e:
+                        print(f"Forward pass failed: {str(e)}")
+                
+                # Print model summary using torchinfo with error handling
+                try:
+                    from torchinfo import summary
+                    print("\nModel Summary:")
+                    model_summary = summary(model, input_size=input_size, device='cpu', verbose=0)
+                    print(model_summary)
+                except Exception as e:
+                    print(f"Failed to generate model summary: {str(e)}")
                 
             except Exception as e:
                 print(f"Error occurred: {str(e)}")

@@ -68,12 +68,14 @@ def add_model_args(parser: argparse.ArgumentParser) -> None:
     emb_group.add_argument('--emb-size', type=int, default=512, 
                           help='Embedding dimension size')
     emb_group.add_argument('--backbone-type', type=str, default='resnet',
-                          choices=['resnet', 'efficientnet_v2_t_inc_24',
-                                 'efficientnet_v2_t_inc_32', 'efficientnet_v2_t_inc_64'],
+                          choices=['resnet', 'tf_efficientnetv2_s',
+                                 'tf_efficientnetv2_m', 'tf_efficientnetv2_l'],
                           help='Backbone architecture')
     emb_group.add_argument('--relu-type', type=str, default='prelu',
                           choices=['silu', 'prelu'],
                           help='Activation function type')
+    emb_group.add_argument('--use-pretrained', type=str2bool, default=False,
+                          help='Use pretrained weights for backbone (only available for EfficientNet models)')
     
     # Backend model args
     backend_group = model_group.add_argument_group('Backend Model')

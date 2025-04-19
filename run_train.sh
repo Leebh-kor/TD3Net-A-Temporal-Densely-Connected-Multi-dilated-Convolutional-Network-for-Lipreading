@@ -10,9 +10,9 @@
 
 # Available Backbone Types:
 # - resnet (default)
-# - efficientnet_v2_t_inc_24
-# - efficientnet_v2_t_inc_32
-# - efficientnet_v2_t_inc_64
+# - tf_efficientnetv2_s
+# - tf_efficientnetv2_m
+# - tf_efficientnetv2_l
 
 # Training Examples:
 
@@ -34,7 +34,7 @@
 # python main.py \
 #     --config-path td3net_configs/td3net_config_base.yaml \
 #     --ex-name td3net_efficient \
-#     --backbone-type efficientnet_v2_t_inc_32 \
+#     --backbone-type tf_efficientnetv2_s \
 
 # Resume training example:
 # CUDA_VISIBLE_DEVICES=0 python main.py \

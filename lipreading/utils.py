@@ -64,7 +64,8 @@ class ModelConfig:
             'dropout_p': args.dropout_p,
             'use_td3_block': args.use_td3_block,
             'use_multi_dilation': args.use_multi_dilation,
-            'use_bottle_layer': args.use_bottle_layer
+            'use_bottle_layer': args.use_bottle_layer,
+            'use_pretrained': args.use_pretrained
         }
 
 def get_model_from_configs(args: Any) -> nn.Module:
