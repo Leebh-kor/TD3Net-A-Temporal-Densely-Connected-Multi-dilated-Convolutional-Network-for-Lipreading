@@ -9,7 +9,7 @@ ptflops
 pyyaml
 ipykernel
 jupyter
-neptune-client
+neptune
 opencv-python
 pytorch-model-summary
 timm>=0.6.7
