@@ -23,7 +23,8 @@ The standard word-level lipreading approach is based on a framework comprising f
 - Windows or Linux OS
 - Python 3.8
 - UV package manager
-- CUDA 11.1 (for PyTorch GPU version)
+- CUDA 12.1 (for PyTorch GPU version)
+- PyTorch 2.1.2
 
 ## Environment Setup
 
@@ -63,10 +64,11 @@ For detailed experiment configurations and execution methods, please refer to th
 
 ### Representative Training Examples
 
-#### 1. Basic TD3Net Training
+#### 1. Basic TD3Net Training with ResNet
 ```bash
 CUDA_VISIBLE_DEVICES=0 python main.py \
     --config-path td3net_configs/td3net_config_base.yaml \
+    --backbone-type resnet \
     --ex-name td3net_base \
     --epochs 50 \
     --neptune_logging true
@@ -90,5 +92,6 @@ For running multiple experiments using different GPUs, refer to `multiple_run.sh
 To test different model configurations and architectures, use `test_model.sh`. This script provides a convenient way to verify model structure, parameter counts, and memory usage before actual training.
 
 ## Notes
-- This project uses PyTorch 1.8.0 with CUDA 11.1
-- For CPU-only usage, you may need to install CPU version of PyTorch 
+- This project uses PyTorch 2.1.2 with CUDA 12.1
+- For CPU-only usage, you may need to install CPU version of PyTorch
+- When using EfficientNet backbone, pretrained weights are available through the `--use-pretrained` option 
