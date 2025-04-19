@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import neptune.new as neptune
+import neptune
 import numpy as np
 import torch
 from dotenv import load_dotenv
