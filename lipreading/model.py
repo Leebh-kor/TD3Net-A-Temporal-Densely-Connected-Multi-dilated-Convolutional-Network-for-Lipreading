@@ -5,13 +5,9 @@ import timm
 import torch
 import torch.nn as nn
 from einops import rearrange
-from einops.layers.torch import Rearrange
 
 from lipreading.modules import (
     BasicBlock,
-    BasicConv,
-    DBasicBlock,
-    DenseBlock,
     ResNet,
     TD3Net,
 )
@@ -170,29 +166,30 @@ if __name__ == '__main__':
     # Model variants to test
     model_configs = [
         # TD3Net variants
-        {'name': 'TD3Net (default)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': True},
-        {'name': 'TD3Net (no bottleneck)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
+        {'name': 'TD3Net (default)', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': False},
+        # {'name': 'TD3Net (no bottleneck)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
         # TD2Net variants
-        {'name': 'TD2Net', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': True},
-        {'name': 'TD2Net (no bottleneck)', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': False},
+        # {'name': 'TD2Net', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': True},
+        # {'name': 'TD2Net (no bottleneck)', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': False},
         # Dense-TCN variants
-        {'name': 'Dense-TCN', 'use_td3_block': False, 'use_multi_dilation': False, 'use_bottle_layer': True},
-        {'name': 'Dense-TCN (no bottleneck)', 'use_td3_block': False, 'use_multi_dilation': False, 'use_bottle_layer': False},
+        # {'name': 'Dense-TCN', 'use_td3_block': False, 'use_multi_dilation': False, 'use_bottle_layer': True},
+        # {'name': 'Dense-TCN (no bottleneck)', 'use_td3_block': False, 'use_multi_dilation': False, 'use_bottle_layer': False},
     ]
     
     # Default input size
     input_size = (2, 1, 29, 88, 88)  # batch_size, channels, frames, height, width
     
     # Backbone types
-    backbone_types = ['resnet', 'efficientnet_v2_t_inc_24', 'efficientnet_v2_t_inc_32', 'efficientnet_v2_t_inc_64']
+    # backbone_types = ['resnet', 'efficientnet_v2_t_inc_24', 'efficientnet_v2_t_inc_32', 'efficientnet_v2_t_inc_64']
+    backbone_types = ['resnet']
     
     # Configuration from td3net_config_base.yaml
     config = {
-        'growth_rate': [36, 36, 36, 36],
-        'num_layers': [5, 5, 5, 5],
-        'num_td2_blocks': [10, 10, 10, 10],
-        'out_block': [5, 5, 5, 5],
-        'block_comp': [0.5, 0.5, 0.5, 0.5],
+        'growth_rate': [52, 52, 52, 52],
+        'num_layers': [12, 20, 24, 18],
+        'num_td2_blocks': [1, 1, 1, 1],
+        'out_block': [12, 20, 24, 18],
+        'block_comp': [0.5, 0.5, 0.5, 1],
         'trans_comp_factor': [2, 2, 2, 1],
         'kernel_size': 3,
         'is_cbr': True,
@@ -230,18 +227,18 @@ if __name__ == '__main__':
             )
             
             # Set model to evaluation mode
-            model.eval()
+            # model.eval()
             
             # Create dummy input
-            dummy_input = torch.randn(input_size)
+            # dummy_input = torch.randn(input_size)
             
             try:
                 # Forward pass
-                with torch.no_grad():
-                    output = model(dummy_input)
+                # with torch.no_grad():
+                    # output = model(dummy_input)
                 
                 # Print results
-                print(f"Output shape: {output.shape}")
+                # print(f"Output shape: {output.shape}")
                 print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M")
                 
                 # Check memory usage
