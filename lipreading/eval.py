@@ -14,7 +14,7 @@ class Tester:
         self.dset_loader = dset_loader['test']
         self.criterion = nn.CrossEntropyLoss()
         self.model = get_model_from_configs(self.args)
-        best_fp = os.path.join('{}/{}'.format(self.args.logging_dir, self.args.ex_name), 'ckpt.best.pth.tar')
+        best_fp = os.path.join('{}/{}'.format(self.args.logging_dir, self.args.ex_name), 'ckpt.best.pth.tar') if not self.args.model_path else self.args.model_path
         self.model = ModelLoader.load_model(
             best_fp, 
             self.model, 
