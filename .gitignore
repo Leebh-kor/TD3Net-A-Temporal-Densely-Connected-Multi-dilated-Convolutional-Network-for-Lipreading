@@ -52,6 +52,7 @@ Thumbs.db
 logs/
 log/
 train_logs/
+*.out
 
 # Neptune
 .neptune/
@@ -66,6 +67,7 @@ data/
 datasets/
 *.npz
 *.npy 
+*.yaml
 
 # Etc
 upload_weights.py
