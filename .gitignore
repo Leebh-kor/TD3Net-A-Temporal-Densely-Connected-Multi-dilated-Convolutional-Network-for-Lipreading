@@ -61,6 +61,7 @@ train_logs/
 *.pth
 *.pth.tar
 checkpoints/
+tcns_flops/  
 
 # Data
 data/
