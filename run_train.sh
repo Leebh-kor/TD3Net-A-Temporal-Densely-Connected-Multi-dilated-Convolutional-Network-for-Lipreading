@@ -10,31 +10,39 @@
 
 # Available Backbone Types:
 # - resnet (default)
-# - tf_efficientnetv2_s
+# - tf_efficientnetv2_s (Optional: --use-pretrained)
 # - tf_efficientnetv2_m
 # - tf_efficientnetv2_l
 
 # Training Examples:
 
 # 1. Train TD3Net with default settings
-# CUDA_VISIBLE_DEVICES=0 python main.py \
-#     --config-path td3net_configs/td3net_config_base.yaml \
-#     --ex-name td3net_base \
-#     --epochs 50 \
-#     --neptune_logging true \
+CUDA_VISIBLE_DEVICES=1 python main.py \
+    --config-path td3net_configs/td3net_config_base.yaml \
+    --ex-name temp \
+    --epochs 120 \
+    # --neptune_logging true \
 
-# 2. Train TD2Net variant
-# refer to Available Model Variants
-# python main.py \
+# 1.1 background training using nohup
+# CUDA_VISIBLE_DEVICES=0 nohup python main.py \
 #     --config-path td3net_configs/td3net_config_base.yaml \
-#     --ex-name td3net_td2net \
-#     --use-td3-block false \
+#     --ex-name refactored_td3net_base \
+#     --epochs 120 \
+#     # --neptune_logging true > refactored_td3net_base.out &  
 
-# 3. Train with EfficientNet backbone
-# python main.py \
+# 2. Train with EfficientNet backbone
+# CUDA_VISIBLE_DEVICES=1 python main.py \
 #     --config-path td3net_configs/td3net_config_base.yaml \
 #     --ex-name td3net_efficient \
 #     --backbone-type tf_efficientnetv2_s \
+#     # --use-pretrained true # Optional: Use pretrained weights
+
+# 3. Train TD2Net variant
+# refer to Available Model Variants
+# python main.py \
+#     --config-path td3net_configs/td2net_v1_config.yaml \
+#     --ex-name td2net_base \
+#     --use-td3-block false \
 
 # Resume training example:
 # CUDA_VISIBLE_DEVICES=0 python main.py \
@@ -50,5 +58,4 @@
 # CUDA_VISIBLE_DEVICES=0 python main.py \
 #     --action test \
 #     --config-path td3net_configs/td3net_config_base.yaml \
-#     --ex-name tmp \
-#     --model-path ./train_logs/tmp/ckpt.pth.tar
+#     --model-path ./train_logs/td3net_base/ckpt.best.pth.tar
