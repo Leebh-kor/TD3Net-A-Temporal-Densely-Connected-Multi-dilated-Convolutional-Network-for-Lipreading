@@ -34,8 +34,8 @@ class BasicBlock(nn.Module):
 
         # type of ReLU is an input option
         if relu_type == 'relu':
-            self.relu1 = nn.ReLU(inplace=True)
-            self.relu2 = nn.ReLU(inplace=True)
+            self.relu1 = nn.ReLU()
+            self.relu2 = nn.ReLU()
         elif relu_type == 'prelu':
             self.relu1 = nn.PReLU(num_parameters=planes)
             self.relu2 = nn.PReLU(num_parameters=planes)
@@ -59,7 +59,7 @@ class BasicBlock(nn.Module):
         if self.downsample is not None:
             residual = self.downsample(x)
 
-        out += residual
+        out = out + residual
         out = self.relu2(out)
 
         return out

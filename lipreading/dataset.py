@@ -119,7 +119,7 @@ class MyDataset(object):
         return preprocess_data, label
 
     def __len__(self):
-        return len(self._data_files) // 10
+        return len(self._data_files)
 
 
 def pad_packed_collate(batch):

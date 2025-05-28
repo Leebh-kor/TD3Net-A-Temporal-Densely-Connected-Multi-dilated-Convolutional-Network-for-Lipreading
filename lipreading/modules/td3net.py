@@ -212,7 +212,7 @@ class TD2Block(nn.Module):
         self.num_layers = num_layers
         self.use_multi_dilation = use_multi_dilation
         self.use_bottle_layer = use_bottle_layer
-
+        
         if use_bottle_layer and self.bc_ch < in_ch:
             self.bottle_layer = BasicConv(
                 in_channels=in_ch,
@@ -304,6 +304,7 @@ class Multi_Dilated_Dense_Block(nn.Module):
         layers = []
         for i in range(num_layers - 1):
             d = int(2**(i+1))
+            # d = 1 + i
             layers.append(BasicConv(
                 in_channels=growth_rate,
                 out_channels=growth_rate * (num_layers-i-1),
@@ -323,7 +324,7 @@ class Multi_Dilated_Dense_Block(nn.Module):
         
         def update(inp_, n):
             for j in range(self.num_layers-n-1):
-                lst[j+1+n] += inp_[:, j*self.growth_rate:(j+1)*self.growth_rate]
+                lst[j+1+n] = lst[j+1+n] + inp_[:, j*self.growth_rate:(j+1)*self.growth_rate]
 
         for i, layer in enumerate(self.layers):
             update(layer(lst[i]), i)
