@@ -15,7 +15,7 @@ The experiments were conducted in the following environment: Ubuntu 20.04, Pytho
 Params and FLOPs are measured for the TD3Net backend only, as this work focuses on backend efficiency. FLOPs were calculated using [fvcore](https://github.com/facebookresearch/fvcore).
 To check the parameter count and FLOPs of any model configuration, you can run `test_model.sh` (which executes `lipreading/model.py`).
 
-| Method | # Params (M) | FLOPs (GFLOPs) | Inference time (s) | Accuracy (%) |
+| Method | # Params (M) | FLOPs (G) | Inference time (s) | Accuracy (%) |
 |--------|-------------|---------------|-------------------|--------------|
 | TD3Net-Base | 18.69 | 1.56 | 45 | [89.36](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_base/ckpt.best.pth.tar) |
 | TD3Net-Best | 31.39 | 1.92 | 49 | [89.54](https://huggingface.co/lbh-kor/TD3Net-weights/blob/main/td3net_best/ckpt.best.pth.tar) |
