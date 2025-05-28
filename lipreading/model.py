@@ -5,7 +5,10 @@ import numpy as np
 import timm
 import torch
 import torch.nn as nn
+import yaml
 from einops import rearrange
+from einops.layers.torch import Rearrange
+from fvcore.nn import FlopCountAnalysis
 
 from lipreading.modules import (
     BasicBlock,
@@ -41,6 +44,8 @@ class FrameEmbedding(nn.Module):
         elif 'efficientnet' in backbone_type:
             # Create EfficientNet backbone
             backbone = timm.create_model(backbone_type, pretrained=use_pretrained)
+            if use_pretrained:
+                print(f"Successfully loaded pretrained weights for {backbone_type}")
             if hasattr(backbone, 'conv_stem'):
                 frontend_nout = backbone.conv_stem.out_channels  # Get first layer's output channels
                 backbone.conv_stem = nn.Identity()
@@ -61,27 +66,22 @@ class FrameEmbedding(nn.Module):
             nn.Conv3d(in_channels, frontend_nout, kernel_size=(3, 7, 7), stride=(1, 2, 2), padding=(1, 3, 3), bias=False),
             nn.BatchNorm3d(frontend_nout),
             frontend_relu,
-            nn.MaxPool3d(kernel_size=(1, 3, 3), stride=(1, 2, 2), padding=(0, 1, 1))
+            nn.MaxPool3d(kernel_size=(1, 3, 3), stride=(1, 2, 2), padding=(0, 1, 1)),  
+            Rearrange("b c t h w -> (b t) c h w"), # Reshape to 2D for backbone
+            self.trunk, # 2D backbone
         )
-        
         pretrained_status = "with pretrained weights" if use_pretrained and 'efficientnet' in backbone_type else "without pretrained weights"
         print(f"Using backbone: {backbone_type} ({pretrained_status}), Frontend channels: {frontend_nout}, Output dimension: {self.emb_dim}")
 
     def forward(self, x):
         B, _, T, H, W = x.size()
-        
-        # Frontend 3D convolution
+
+        # Apply Frontend 
         x = self.frontend(x)
-        
-        # Reshape to 2D for backbone
-        x = rearrange(x, "b c t h w -> (b t) c h w")
-        
-        # Backbone
-        x = self.trunk(x)
-        
+
         # Reshape back to temporal dimension
-        x = rearrange(x, "(b t) c -> b c t", b=B)
-        
+        x = rearrange(x, "(b t) c -> b c t", t=T)
+
         return x
     
 class TD3Net_Lipreading(nn.Module):
@@ -130,10 +130,13 @@ class TD3Net_Lipreading(nn.Module):
                     use_multi_dilation=use_multi_dilation,
                     use_bottle_layer=use_bottle_layer,
                 )
+        
         self.cls_layer = nn.Linear(self.backend_network.out_ch, 500)
         
         # -- initialize
         self.initialize_weights_randomly()
+
+        print(self.backend_network.__class__)
         
     def forward(self, x, lengths=None):
         x = self.emd_network(x) # [B, C, T]
@@ -175,7 +178,7 @@ if __name__ == '__main__':
     # Model variants to test
     model_configs = [
         # TD3Net variants
-        {'name': 'TD3Net (default)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
+        {'name': 'TD3Net (default)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': True},
         # {'name': 'TD3Net (no bottleneck)', 'use_td3_block': True, 'use_multi_dilation': True, 'use_bottle_layer': False},
         # TD2Net variants
         # {'name': 'TD2Net', 'use_td3_block': False, 'use_multi_dilation': True, 'use_bottle_layer': True},
@@ -185,26 +188,14 @@ if __name__ == '__main__':
         # {'name': 'Dense-TCN (no bottleneck)', 'use_td3_block': False, 'use_multi_dilation': False, 'use_bottle_layer': False},
     ]
     
-    # Default input size
-    input_size = (2, 1, 29, 88, 88)  # batch_size, channels, frames, height, width
-    
-    # Backbone types - use tf_efficientnetv2_s instead of efficientnetv2_s
-    backbone_types = ['resnet', 'tf_efficientnetv2_s', 'tf_efficientnetv2_m', 'tf_efficientnetv2_l']  # This is the correct model name in timm
-    # backbone_types = ['tf_efficientnetv2_s']
+    # Backbone types
+    # backbone_types = ['resnet', 'tf_efficientnetv2_s', 'tf_efficientnetv2_m', 'tf_efficientnetv2_l']  # This is the correct model name in timm
+    backbone_types = ['resnet']
+
     # Configuration from td3net_config_base.yaml
-    config = {
-        'growth_rate': [52, 52, 52, 52],
-        'num_layers': [16, 20, 24, 18],
-        'num_td2_blocks': [1, 1, 1, 1],
-        'out_block': [16, 20, 24, 18],
-        'block_comp': [0.5, 0.5, 0.5, 1],
-        'trans_comp_factor': [2, 2, 2, 1],
-        'kernel_size': 3,
-        'is_cbr': True,
-        'dropout_p': 0.2,
-        'use_pretrained': False  # Default value from config.py
-    }
-    
+    with open('td3net_configs/td2net_config.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+
     print("\n=== Model Testing Started ===\n")
     
     for model_config in model_configs:
@@ -233,37 +224,47 @@ if __name__ == '__main__':
                 use_td3_block=model_config['use_td3_block'],
                 use_multi_dilation=model_config['use_multi_dilation'],
                 use_bottle_layer=model_config['use_bottle_layer'],
-                use_pretrained=True,
+                use_pretrained=False,
             )
             
-            try:
-                # Print results
-                print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M")
-                
-                # Create dummy input
-                dummy_input = torch.randn(input_size)
-                
-                # Forward pass test
-                model.eval()  # Set model to evaluation mode
-                with torch.no_grad():
-                    try:
-                        output = model(dummy_input)
-                        print(f"Forward pass successful. Output shape: {output.shape}")
-                    except Exception as e:
-                        print(f"Forward pass failed: {str(e)}")
-                
-                # Print model summary using torchinfo with error handling
+           
+            # Forward pass test
+            input_size = (1, 1, 29, 88, 88)  # batch_size, channels, frames, height, width
+            dummy_input = torch.randn(input_size)
+            model.eval()  # Set model to evaluation mode
+            with torch.no_grad():
                 try:
-                    from torchinfo import summary
-                    print("\nModel Summary:")
-                    model_summary = summary(model, input_size=input_size, device='cpu', verbose=0)
-                    print(model_summary)
+                    output = model(dummy_input)
+                    print(f"Forward pass successful. Output shape: {output.shape}")
                 except Exception as e:
-                    print(f"Failed to generate model summary: {str(e)}")
+                    print(f"Forward pass failed: {str(e)}")
+            try:
+                # Calculate number of parameters
+                print('-'*50)
+                print(f"Number of parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad) / 1e6:.2f}M")
+                print(f"Number of parameters: {sum(p.numel() for p in model.backend_network.parameters() if p.requires_grad) / 1e6:.2f}M")
+
+                # Calculate FLOPs
+                print('-'*50)
+
+                # ptflops
+                # macs, nparams = get_model_complexity_info(model.backend_network, (512, 29), backend='aten', as_strings=True, print_per_layer_stat=True, verbose=True)
+                # print(f"MACs: {macs*2}, Params: {nparams}")
+
+                # fvcore
+                # total
+                # flops = FlopCountAnalysis(model, torch.randn(1, 1, 29, 88, 88))
+                # backend
+                flops = FlopCountAnalysis(model.backend_network, torch.randn(1, 512, 29))
+
+                total_gflops = flops.total() / 1e9
+                print("Backend FLOPs: {:.2f} GFLOPs".format(total_gflops*2))
                 
+                # flops_by_op = flops.by_operator()
+                # for op, flop in flops_by_op.items():
+                #     print(f"{op*2}: {flop/1e9:.2f} GFLOPs")
+            
             except Exception as e:
                 print(f"Error occurred: {str(e)}")
-            
-            print("\n" + "="*50)
     
     print("\n=== Model Testing Completed ===")
