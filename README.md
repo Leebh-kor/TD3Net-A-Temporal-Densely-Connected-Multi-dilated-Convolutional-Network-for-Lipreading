@@ -4,8 +4,9 @@ This is the official implementation of our paper "TD3Net: Temporal Densely Conne
 
 
 ## Overview
-
-The standard word-level lipreading approach is based on a framework comprising frontend and backend architectures to model dynamic lip movements. Each component has been studied extensively, and in the backend architecture, temporal convolutional networks (TCNs) have been widely adopted by state-of-the-art methods. In particular, dense skip connections have been recently employed in TCN to mitigate the insufficient density of the receptive field range for capturing complex temporal representations. However, the performance of this method is still limited owing to its potential for information loss regarding the continuous nature of lip movements resulting from blind spots in the receptive field. Considering these problems, we propose a temporal densely connected multidilated convolutional network (TD3Net) as the backend architecture, combining dense skip connections and multidilated temporal convolutions. TD3Net covers a wide and dense receptive field without blind spots by applying different dilation factors depending on skip-connected features. The experimental results on a word-level lipreading task using the two largest publicly available datasets reveal that the proposed method exhibits significantly improved performance compared to state-of-the-art methods. Moreover, the visualization results indicate that the proposed approach effectively utilizes diverse temporal features while preserving temporal continuity, presenting notable benefits in lipreading systems.
+The word-level lipreading approach typically employs a two-stage framework with separate frontend and backend architectures to model dynamic lip movements. Each component has been extensively studied, and in the backend architecture, temporal convolutional networks (TCNs) have been widely adopted in state-of-the-art methods. Recently, dense skip connections have been introduced in TCNs to mitigate the limited density of the receptive field, thereby improving the modeling of complex temporal representations. However, their performance remains constrained owing to potential information loss regarding the continuous nature of lip movements, caused by blind spots in the receptive field. To address this limitation, we propose TD3Net, a temporal densely connected multi-dilated convolutional network that combines dense skip connections and multi-dilated temporal convolutions as the backend architecture. 
+TD3Net covers a wide and dense receptive field without blind spots by applying different dilation factors to skip-connected features.
+Experimental results on a word-level lipreading task using two large publicly available datasets, Lip Reading in the Wild (LRW) and LRW-1000, indicate that the proposed method achieves performance comparable to state-of-the-art methods. It achieved higher accuracy with fewer parameters and lower floating-point operations compared to existing TCN-based backend architectures. Moreover, visualization results suggest that our approach effectively utilizes diverse temporal features while preserving temporal continuity, presenting notable advantages in lipreading systems.
 
 ## Main Results
 
@@ -30,7 +31,7 @@ To check the parameter count and FLOPs of any model configuration, you can run `
 - Python 3.8
 - UV package manager
 - CUDA 12.1 (for PyTorch GPU version)
-- PyTorch 2.1.2
+- PyTorch 1.8.0
 
 ## Installation
 ### 1. Clone the Repository
@@ -148,13 +149,13 @@ If you have trained your own model, you can run inference with the corresponding
 CUDA_VISIBLE_DEVICES=0 python main.py \
     --action test \
     --backbone-type resnet \  # Options: resnet, tf_efficientnetv2_s/m/l
-    --config-path td3net_configs/td3net_config_base.yaml \
-    --model-path ./train_logs/tmp/ckpt.pth.tar
+    --config-path <YOUR_CONFIG_PATH> \
+    --model-path <YOUR_MODEL_PATH>
 ```
 
 
 ## Citation
-If you find our work useful in your research, please consider citing:
+If you find our work useful in your research, please consider citing our paper (arXiv submission in preparation):
 
 ```
 @article{lee2025td3net,
@@ -162,6 +163,7 @@ If you find our work useful in your research, please consider citing:
   author    = {Lee, Byung Hoon and Others},
   journal   = {Journal of Visual Communication and Image Representation},
   year      = {2025},
+  note      = {arXiv submission in preparation},
   url       = {https://arxiv.org/abs/xxxx.xxxxx}
 }
 ```
