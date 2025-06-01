@@ -15,11 +15,12 @@ pytorch-model-summary
 timm>=0.6.7
 torchinfo
 python-dotenv>=0.19.0
-# moviepy
+fvcore
+typing-extensions>=4.5.0
+torch-optimizer==0.1.0
+
+# Pytorch packages
 --find-links https://download.pytorch.org/whl/torch_stable.html
 torch>=2.0.0
 torchvision>=0.15.0
 torchaudio>=2.0.0
-torch-optimizer==0.1.0
-tqdm==4.62.3
-typing-extensions>=4.5.0
