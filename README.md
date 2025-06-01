@@ -26,13 +26,6 @@ To check the parameter count and FLOPs of any model configuration, you can run `
 > For inference with these pretrained weights, please refer to the [Inference Only](#inference-only) section below.
 
 
-## Requirements
-- Windows or Linux OS
-- Python 3.8
-- UV package manager
-- CUDA 12.1 (for PyTorch GPU version)
-- PyTorch 1.8.0
-
 ## Installation
 ### 1. Clone the Repository
 ```bash
