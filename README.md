@@ -148,8 +148,7 @@ CUDA_VISIBLE_DEVICES=0 python main.py \
 
 
 ## Citation
-If you find our work useful in your research, please consider citing our paper (arXiv submission in preparation):
-
+If you find our work useful in your research, please consider citing our paper:
 ```
 @article{lee2025td3net,
   title   = {TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading},
