@@ -1,6 +1,6 @@
 # TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading
 
-This is the official implementation of our paper "TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading" (under revision at Journal of Visual Communication and Image Representation).
+This is the official implementation of our paper ["TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading"](https://arxiv.org/abs/2506.16073) (under revision at *Journal of Visual Communication and Image Representation*).
 
 
 ## Overview
@@ -152,11 +152,10 @@ If you find our work useful in your research, please consider citing our paper (
 
 ```
 @article{lee2025td3net,
-  title     = {TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading},
-  author    = {Lee, Byung Hoon and Others},
-  journal   = {Journal of Visual Communication and Image Representation},
-  year      = {2025},
-  note      = {arXiv submission in preparation},
-  url       = {https://arxiv.org/abs/xxxx.xxxxx}
+  title   = {TD3Net: Temporal Densely Connected Multidilated Convolutional Network for Word-Level Lipreading},
+  author  = {Lee, Byung Hoon and Shin, Wooseok and Han, Sung Won},
+  journal = {arXiv preprint arXiv:2506.16073},
+  year    = {2025},
+  url     = {https://arxiv.org/abs/2506.16073}
 }
 ```
